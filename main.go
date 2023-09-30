@@ -30,7 +30,7 @@ type Todo struct {
 
 func main() {
 
-	//* Menyalakan DATAABASE
+	//* Turn on database DATAABASE
 	dsn := "host=127.0.0.1 user=postgres password= dbname=todolist port=5432 sslmode=disable TimeZone=Asia/Jakarta"
 	db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -44,6 +44,7 @@ func main() {
 
 		var users []User
 
+		// Get data from database with order desc
 		db.Debug().Preload("Todo").Order("id desc").Find(&users)
 
 		c.JSON(200, gin.H{
@@ -140,11 +141,14 @@ func main() {
 		})
 	})
 
-	//* POST TODOLIST in THAT USER
+	//* PUT TODOLIST in THAT USER
 	router.PUT("/users/:userid/todolist/:todoid", func(c *gin.Context) {
 
+		// Get data from PARAM
 		id, _ := strconv.Atoi(c.Param("userid"))
 		todo_id, _ := strconv.Atoi(c.Param("todoid"))
+
+		// Input from Form
 		event := c.PostForm("event")
 
 		todo := Todo{
@@ -153,6 +157,7 @@ func main() {
 			Event:  event,
 		}
 
+		// Save data to db
 		db.Debug().Save(&todo)
 
 		c.JSON(200, gin.H{
@@ -164,8 +169,10 @@ func main() {
 	//* DELETE USERS
 	router.DELETE("/users/:id/todolist/:todoid", func(c *gin.Context) {
 
+		// get data from parameter
 		todo_id, _ := strconv.Atoi(c.Param("todoid"))
 
+		// delete data with id
 		db.Delete(&Todo{}, uint(todo_id))
 
 		c.JSON(200, gin.H{
